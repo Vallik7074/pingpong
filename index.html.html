@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pong Game - Игра с ботом</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            font-family: 'Arial', sans-serif;
+            color: #fff;
+            padding: 20px;
+        }
+        
+        .game-container {
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+            letter-spacing: 2px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 25px;
+            color: #a0a0ff;
+        }
+        
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #00ff88;
+        }
+        
+        .score-board {
+            display: flex;
+            gap: 40px;
+        }
+        
+        .score {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #00ff88;
+        }
+        
+        .player-label {
+            font-size: 1.2rem;
+            color: #a0a0ff;
+            margin-bottom: 5px;
+        }
+        
+        .controls {
+            text-align: left;
+        }
+        
+        .controls h3 {
+            color: #00ff88;
+            margin-bottom: 10px;
+        }
+        
+        .controls p {
+            margin-bottom: 5px;
+            color: #ccc;
+        }
+        
+        .game-wrapper {
+            position: relative;
+            margin: 0 auto;
+            width: fit-content;
+        }
+        
+        #gameCanvas {
+            background-color: #000;
+            border-radius: 5px;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.2);
+            border: 2px solid #00ff88;
+        }
+        
+        .controls-panel {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #00ff88;
+        }
+        
+        .bot-settings, .game-settings {
+            text-align: left;
+            flex: 1;
+            margin: 0 15px;
+        }
+        
+        .bot-settings h3, .game-settings h3 {
+            color: #00ff88;
+            margin-bottom: 15px;
+        }
+        
+        .slider-container {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ccc;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 10px;
+            -webkit-appearance: none;
+            background: #333;
+            border-radius: 5px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #00ff88;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .bot-status {
+            margin-top: 10px;
+            padding: 8px;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 5px;
+            border-left: 3px solid #00ff88;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        button {
+            padding: 12px 25px;
+            background: #00ff88;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+        }
+        
+        button:hover {
+            background: #00cc6a;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+        }
+        
+        #pauseBtn {
+            background: #ffaa00;
+        }
+        
+        #pauseBtn:hover {
+            background: #cc8800;
+        }
+        
+        #resetBtn {
+            background: #ff5555;
+        }
+        
+        #resetBtn:hover {
+            background: #cc4444;
+        }
+        
+        .game-status {
+            margin-top: 20px;
+            font-size: 1.5rem;
+            color: #00ff88;
+            min-height: 30px;
+        }
+        
+        .instructions {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border: 1px solid #00ff88;
+            text-align: left;
+        }
+        
+        .instructions h3 {
+            color: #00ff88;
+            margin-bottom: 10px;
+        }
+        
+        .instructions p {
+            margin-bottom: 8px;
+            color: #ccc;
+        }
+        
+        .instructions ul {
+            margin-left: 20px;
+            color: #ccc;
+        }
+        
+        .instructions li {
+            margin-bottom: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .controls-panel {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .game-info {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .score {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>PING PONG</h1>
+        <div class="subtitle">Классическая аркада с искусственным интеллектом</div>
+        
+        <div class="game-info">
+            <div class="score-board">
+                <div class="player-score">
+                    <div class="player-label">ИГРОК</div>
+                    <div id="playerScore" class="score">0</div>
+                </div>
+                <div class="bot-score">
+                    <div class="player-label">БОТ</div>
+                    <div id="botScore" class="score">0</div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <h3>Управление:</h3>
+                <p>↑ / ↓ - Двигать ракетку</p>
+                <p>P - Пауза</p>
+                <p>R - Сброс игры</p>
+            </div>
+        </div>
+        
+        <div class="game-wrapper">
+            <canvas id="gameCanvas" width="800" height="500"></canvas>
+            <div class="game-status" id="gameStatus"></div>
+        </div>
+        
+        <div class="controls-panel">
+            <div class="bot-settings">
+                <h3>Настройки бота</h3>
+                <div class="slider-container">
+                    <label for="botSpeed">Скорость реакции бота: <span id="botSpeedValue">5</span></label>
+                    <input type="range" id="botSpeed" min="1" max="10" value="5">
+                </div>
+                <div class="slider-container">
+                    <label for="botAccuracy">Точность бота: <span id="botAccuracyValue">7</span></label>
+                    <input type="range" id="botAccuracy" min="1" max="10" value="7">
+                </div>
+                <div class="bot-status" id="botStatus">
+                    Режим: <span id="botMode">Слежение за мячом</span>
+                </div>
+            </div>
+            
+            <div class="game-settings">
+                <h3>Управление игрой</h3>
+                <div class="slider-container">
+                    <label for="gameSpeed">Скорость игры: <span id="gameSpeedValue">5</span></label>
+                    <input type="range" id="gameSpeed" min="1" max="10" value="5">
+                </div>
+                <div class="buttons">
+                    <button id="startBtn">Старт</button>
+                    <button id="pauseBtn">Пауза</button>
+                    <button id="resetBtn">Сброс</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>Как играть:</h3>
+            <p>Цель игры - отбивать мяч ракеткой и не пропускать его. Игрок управляет левой ракеткой, бот - правой.</p>
+            <p>Настройки бота позволяют регулировать сложность игры:</p>
+            <ul>
+                <li><strong>Скорость реакции</strong> - как быстро бот реагирует на движение мяча</li>
+                <li><strong>Точность</strong> - насколько точно бот предсказывает траекторию мяча</li>
+            </ul>
+            <p>Мяч ускоряется после каждого отскока от ракетки. Первый игрок, набравший 10 очков, побеждает!</p>
+        </div>
+    </div>
+
+    <script>
+        // Получаем элементы canvas и контекст
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Элементы интерфейса
+        const playerScoreElement = document.getElementById('playerScore');
+        const botScoreElement = document.getElementById('botScore');
+        const gameStatusElement = document.getElementById('gameStatus');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const botSpeedSlider = document.getElementById('botSpeed');
+        const botAccuracySlider = document.getElementById('botAccuracy');
+        const gameSpeedSlider = document.getElementById('gameSpeed');
+        const botSpeedValue = document.getElementById('botSpeedValue');
+        const botAccuracyValue = document.getElementById('botAccuracyValue');
+        const gameSpeedValue = document.getElementById('gameSpeedValue');
+        const botModeElement = document.getElementById('botMode');
+        const botStatusElement = document.getElementById('botStatus');
+
+        // Игровые переменные
+        let gameRunning = false;
+        let gamePaused = false;
+        let playerScore = 0;
+        let botScore = 0;
+        let animationId;
+
+        // Параметры игры
+        const paddleWidth = 15;
+        const paddleHeight = 100;
+        const ballSize = 15;
+        const maxScore = 10;
+
+        // Параметры бота
+        let botSpeed = 5;
+        let botAccuracy = 7;
+        let gameSpeed = 5;
+
+        // Позиции объектов
+        let playerY = canvas.height / 2 - paddleHeight / 2;
+        let botY = canvas.height / 2 - paddleHeight / 2;
+        let ballX = canvas.width / 2;
+        let ballY = canvas.height / 2;
+
+        // Скорость мяча
+        let ballSpeedX = 5;
+        let ballSpeedY = 3;
+
+        // Управление игроком
+        let upPressed = false;
+        let downPressed = false;
+
+        // Настройки элементов управления
+        botSpeedSlider.addEventListener('input', function() {
+            botSpeed = parseInt(this.value);
+            botSpeedValue.textContent = botSpeed;
+            updateBotStatus();
+        });
+
+        botAccuracySlider.addEventListener('input', function() {
+            botAccuracy = parseInt(this.value);
+            botAccuracyValue.textContent = botAccuracy;
+            updateBotStatus();
+        });
+
+        gameSpeedSlider.addEventListener('input', function() {
+            gameSpeed = parseInt(this.value);
+            gameSpeedValue.textContent = gameSpeed;
+        });
+
+        // Кнопки управления
+        startBtn.addEventListener('click', function() {
+            if (!gameRunning) {
+                startGame();
+            } else if (gamePaused) {
+                resumeGame();
+            }
+        });
+
+        pauseBtn.addEventListener('click', function() {
+            if (gameRunning && !gamePaused) {
+                pauseGame();
+            } else if (gamePaused) {
+                resumeGame();
+            }
+        });
+
+        resetBtn.addEventListener('click', resetGame);
+
+        // Управление с клавиатуры
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowUp' || event.key === 'Up') {
+                upPressed = true;
+            } else if (event.key === 'ArrowDown' || event.key === 'Down') {
+                downPressed = true;
+            } else if (event.key === 'p' || event.key === 'P' || event.key === 'з' || event.key === 'З') {
+                if (gameRunning && !gamePaused) {
+                    pauseGame();
+                } else if (gamePaused) {
+                    resumeGame();
+                }
+            } else if (event.key === 'r' || event.key === 'R' || event.key === 'к' || event.key === 'К') {
+                resetGame();
+            } else if (event.key === ' ' || event.key === 'Spacebar') {
+                if (!gameRunning) {
+                    startGame();
+                }
+            }
+        });
+
+        document.addEventListener('keyup', function(event) {
+            if (event.key === 'ArrowUp' || event.key === 'Up') {
+                upPressed = false;
+            } else if (event.key === 'ArrowDown' || event.key === 'Down') {
+                downPressed = false;
+            }
+        });
+
+        // Функции управления игрой
+        function startGame() {
+            if (gameRunning) return;
+            
+            gameRunning = true;
+            gamePaused = false;
+            gameStatusElement.textContent = "Игра идет!";
+            startBtn.textContent = "Продолжить";
+            
+            // Сброс мяча
+            resetBall();
+            
+            // Запуск игрового цикла
+            gameLoop();
+        }
+
+        function pauseGame() {
+            if (!gameRunning || gamePaused) return;
+            
+            gamePaused = true;
+            gameStatusElement.textContent = "ПАУЗА";
+            pauseBtn.textContent = "Продолжить";
+            cancelAnimationFrame(animationId);
+        }
+
+        function resumeGame() {
+            if (!gameRunning || !gamePaused) return;
+            
+            gamePaused = false;
+            gameStatusElement.textContent = "Игра идет!";
+            pauseBtn.textContent = "Пауза";
+            gameLoop();
+        }
+
+        function resetGame() {
+            gameRunning = false;
+            gamePaused = false;
+            playerScore = 0;
+            botScore = 0;
+            playerY = canvas.height / 2 - paddleHeight / 2;
+            botY = canvas.height / 2 - paddleHeight / 2;
+            
+            updateScores();
+            gameStatusElement.textContent = "Готовы начать?";
+            startBtn.textContent = "Старт";
+            pauseBtn.textContent = "Пауза";
+            
+            cancelAnimationFrame(animationId);
+            draw();
+        }
+
+        // Обновление статуса бота
+        function updateBotStatus() {
+            let modeText = "";
+            
+            if (botSpeed >= 7 && botAccuracy >= 7) {
+                modeText = "Эксперт";
+                botStatusElement.style.borderLeftColor = "#ff5555";
+            } else if (botSpeed >= 5 && botAccuracy >= 5) {
+                modeText = "Продвинутый";
+                botStatusElement.style.borderLeftColor = "#ffaa00";
+            } else {
+                modeText = "Новичок";
+                botStatusElement.style.borderLeftColor = "#00ff88";
+            }
+            
+            botModeElement.textContent = modeText;
+        }
+
+        // Обновление счета
+        function updateScores() {
+            playerScoreElement.textContent = playerScore;
+            botScoreElement.textContent = botScore;
+        }
+
+        // Сброс мяча
+        function resetBall() {
+            ballX = canvas.width / 2;
+            ballY = canvas.height / 2;
+            
+            // Случайное направление мяча
+            ballSpeedX = (Math.random() > 0.5 ? 1 : -1) * (5 + gameSpeed * 0.5);
+            ballSpeedY = (Math.random() * 4 - 2) * (1 + gameSpeed * 0.1);
+        }
+
+        // Логика бота
+        function moveBot() {
+            // Предсказываем, где будет мяч
+            let predictedY = ballY;
+            
+            // Если мяч движется к боту
+            if (ballSpeedX > 0) {
+                // Время, за которое мяч достигнет правой стороны
+                const timeToReach = (canvas.width - ballX - paddleWidth) / ballSpeedX;
+                predictedY = ballY + ballSpeedY * timeToReach;
+                
+                // Добавляем случайность в зависимости от точности
+                const accuracyFactor = (11 - botAccuracy) * 2; // Меньше точность = больше ошибка
+                predictedY += (Math.random() * accuracyFactor - accuracyFactor / 2);
+                
+                // Учитываем отскоки от стен
+                while (predictedY < 0 || predictedY > canvas.height) {
+                    if (predictedY < 0) predictedY = -predictedY;
+                    if (predictedY > canvas.height) predictedY = 2 * canvas.height - predictedY;
+                }
+            }
+            
+            // Вычисляем центр ракетки бота
+            const botCenter = botY + paddleHeight / 2;
+            
+            // Определяем направление движения
+            let moveDirection = 0;
+            if (botCenter < predictedY - 10) {
+                moveDirection = 1; // Вниз
+            } else if (botCenter > predictedY + 10) {
+                moveDirection = -1; // Вверх
+            }
+            
+            // Двигаем ракетку бота с учетом скорости
+            botY += moveDirection * botSpeed * (1 + gameSpeed * 0.1);
+            
+            // Не даем ракетке выйти за границы
+            if (botY < 0) botY = 0;
+            if (botY + paddleHeight > canvas.height) botY = canvas.height - paddleHeight;
+        }
+
+        // Логика игры
+        function update() {
+            if (!gameRunning || gamePaused) return;
+            
+            // Движение игрока
+            if (upPressed && playerY > 0) {
+                playerY -= 7 + gameSpeed * 0.3;
+            }
+            if (downPressed && playerY + paddleHeight < canvas.height) {
+                playerY += 7 + gameSpeed * 0.3;
+            }
+            
+            // Движение бота
+            moveBot();
+            
+            // Движение мяча
+            ballX += ballSpeedX * (1 + gameSpeed * 0.1);
+            ballY += ballSpeedY * (1 + gameSpeed * 0.1);
+            
+            // Отскок от верхней и нижней стен
+            if (ballY <= 0 || ballY + ballSize >= canvas.height) {
+                ballSpeedY = -ballSpeedY * 1.05; // Немного ускоряем после отскока
+                
+                // Корректировка позиции, чтобы мяч не застрял в стене
+                if (ballY <= 0) ballY = 0;
+                if (ballY + ballSize >= canvas.height) ballY = canvas.height - ballSize;
+            }
+            
+            // Отскок от левой ракетки (игрок)
+            if (
+                ballX <= paddleWidth &&
+                ballY + ballSize >= playerY &&
+                ballY <= playerY + paddleHeight &&
+                ballSpeedX < 0
+            ) {
+                // Угол отскока зависит от того, куда попал мяч
+                const hitPosition = (ballY - playerY) / paddleHeight;
+                const angle = hitPosition * 2 - 1; // От -1 до 1
+                
+                ballSpeedX = Math.abs(ballSpeedX) * 1.05; // Увеличиваем скорость
+                ballSpeedY = angle * 8 * (1 + gameSpeed * 0.1); // Задаем вертикальную скорость
+                
+                // Корректировка позиции, чтобы мяч не застрял в ракетке
+                ballX = paddleWidth;
+            }
+            
+            // Отскок от правой ракетки (бот)
+            if (
+                ballX + ballSize >= canvas.width - paddleWidth &&
+                ballY + ballSize >= botY &&
+                ballY <= botY + paddleHeight &&
+                ballSpeedX > 0
+            ) {
+                // Угол отскока зависит от того, куда попал мяч
+                const hitPosition = (ballY - botY) / paddleHeight;
+                const angle = hitPosition * 2 - 1; // От -1 до 1
+                
+                ballSpeedX = -Math.abs(ballSpeedX) * 1.05; // Увеличиваем скорость
+                ballSpeedY = angle * 8 * (1 + gameSpeed * 0.1); // Задаем вертикальную скорость
+                
+                // Корректировка позиции, чтобы мяч не застрял в ракетке
+                ballX = canvas.width - paddleWidth - ballSize;
+            }
+            
+            // Проверка забития гола
+            if (ballX < 0) {
+                // Гол боту
+                botScore++;
+                updateScores();
+                checkWin();
+                resetBall();
+            } else if (ballX > canvas.width) {
+                // Гол игроку
+                playerScore++;
+                updateScores();
+                checkWin();
+                resetBall();
+            }
+        }
+
+        // Проверка победы
+        function checkWin() {
+            if (playerScore >= maxScore) {
+                gameStatusElement.textContent = "ПОБЕДА ИГРОКА!";
+                gameRunning = false;
+            } else if (botScore >= maxScore) {
+                gameStatusElement.textContent = "ПОБЕДА БОТА!";
+                gameRunning = false;
+            }
+        }
+
+        // Отрисовка игры
+        function draw() {
+            // Очистка canvas
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Рисуем центральную линию
+            ctx.setLineDash([10, 10]);
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2, 0);
+            ctx.lineTo(canvas.width / 2, canvas.height);
+            ctx.strokeStyle = '#00ff88';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Рисуем ракетку игрока
+            ctx.fillStyle = '#00ff88';
+            ctx.fillRect(0, playerY, paddleWidth, paddleHeight);
+            
+            // Рисуем ракетку бота
+            ctx.fillStyle = '#ff5555';
+            ctx.fillRect(canvas.width - paddleWidth, botY, paddleWidth, paddleHeight);
+            
+            // Рисуем мяч
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(ballX + ballSize/2, ballY + ballSize/2, ballSize/2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Добавляем эффект свечения мяча
+            ctx.shadowColor = '#ffffff';
+            ctx.shadowBlur = 10;
+            ctx.beginPath();
+            ctx.arc(ballX + ballSize/2, ballY + ballSize/2, ballSize/4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+
+        // Игровой цикл
+        function gameLoop() {
+            update();
+            draw();
+            
+            if (gameRunning && !gamePaused) {
+                animationId = requestAnimationFrame(gameLoop);
+            }
+        }
+
+        // Инициализация
+        updateBotStatus();
+        draw();
+
+        // Адаптивный размер canvas
+        function resizeCanvas() {
+            const container = document.querySelector('.game-wrapper');
+            const containerWidth = container.clientWidth;
+            
+            if (containerWidth < 800) {
+                canvas.width = containerWidth - 20;
+                canvas.height = (containerWidth - 20) * 0.625; // Сохраняем пропорции 800x500
+            } else {
+                canvas.width = 800;
+                canvas.height = 500;
+            }
+            
+            draw();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+    </script>
+</body>
+</html>
